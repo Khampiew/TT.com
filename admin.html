@@ -635,6 +635,7 @@
                           <label class="${labelStyle}">Socket</label>
                           <select id="spec-socket" class="${inputStyle}">
                               <option value="">Select</option>
+                              <option>LGA1851</option>
                               <option>LGA1700</option>
                               <option>LGA1200</option>
                               <option>AM5</option>
@@ -660,22 +661,29 @@
                   </div>`;
               break;
           case 'Motherboard':
-              html = `
-                  <div class="grid grid-cols-2 gap-3">
-                      <div>
-                          <label class="${labelStyle}">Socket</label>
-                          <input type="text" id="spec-socket" class="${inputStyle}" placeholder="e.g., LGA1700, AM5">
-                      </div>
-                      <div>
-                          <label class="${labelStyle}">Supported RAM</label>
-                          <select id="spec-supported-ram" class="${inputStyle}">
-                              <option value="">Select</option>
-                              <option>DDR4</option>
-                              <option>DDR5</option>
-                          </select>
-                      </div>
-                  </div>`;
-              break;
+    html = `
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="${labelStyle}">Socket</label>
+                <select id="spec-socket" class="${inputStyle}"> <!-- เปลี่ยนจาก input เป็น select -->
+                    <option value="">Select</option>
+                    <option>LGA1851</option> <!-- เพิ่มตรงนี้ -->
+                    <option>LGA1700</option>
+                    <option>LGA1200</option>
+                    <option>AM5</option>
+                    <option>AM4</option>
+                </select>
+            </div>
+            <div>
+                <label class="${labelStyle}">Supported RAM</label>
+                <select id="spec-supported-ram" class="${inputStyle}">
+                    <option value="">Select</option>
+                    <option>DDR4</option>
+                    <option>DDR5</option>
+                </select>
+            </div>
+        </div>`;
+    break;
           case 'GPU':
               html = `<div class="grid grid-cols-1 gap-3"><div><label class="${labelStyle}">VRAM</label><input type="text" id="spec-vram" class="${inputStyle}" placeholder="e.g., 8GB GDDR6"></div></div>`;
               break;
