@@ -50,6 +50,7 @@
     overflow: hidden;
     transition: transform .15s ease, box-shadow .15s ease;
     background: #fff;
+    min-height: 100%;
   }
   .product-card:hover {
     transform: translateY(-3px);
@@ -57,7 +58,7 @@
   }
   .product-img-wrap {
     width: 100%;
-    height: 190px;
+    height: 150px;
     background: #F1F4F9;
     display: flex;
     align-items: center;
@@ -70,22 +71,27 @@
     object-fit: cover;
   }
   .product-img-wrap i {
-    font-size: 3rem;
+    font-size: 2.5rem;
     color: #C7D0DE;
   }
   .price-badge {
     color: var(--navy);
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
   .card-title-custom {
     font-weight: 600;
     color: #1B2430;
+    font-size: 1rem;
   }
   .card-desc {
     color: #6C7583;
-    font-size: 0.88rem;
-    min-height: 40px;
+    font-size: 0.82rem;
+    min-height: 38px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
   .card-date {
     font-size: 0.78rem;
@@ -137,7 +143,13 @@
 </nav>
 
 <div class="container py-4">
-  <h5 class="section-title mb-3"><i class="bi bi-box-seam"></i> รายการสินค้าอุปกรณ์คอมพิวเตอร์</h5>
+  <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-3 gap-3">
+    <h5 class="section-title mb-0"><i class="bi bi-box-seam"></i> รายการสินค้าอุปกรณ์คอมพิวเตอร์</h5>
+    <div class="w-100 w-md-50">
+      <input id="searchInput" type="search" class="form-control" placeholder="ค้นหาสินค้า... เช่น RAM, SSD, CPU">
+    </div>
+  </div>
+  <div class="mb-3 text-muted small"><span id="productCount">0</span> รายการ</div>
 
   <!-- Loading -->
   <div id="loadingState" class="loading-state">
@@ -178,9 +190,9 @@
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-semibold">ราคา (บาท) <span class="text-danger">*</span></label>
+            <label class="form-label fw-semibold">ราคา (กีบ) <span class="text-danger">*</span></label>
             <div class="input-group">
-              <span class="input-group-text">฿</span>
+              <span class="input-group-text">₭</span>
               <input type="number" class="form-control" id="productPrice" min="0" step="0.01" placeholder="0.00" required>
             </div>
           </div>
@@ -240,8 +252,12 @@ const TABLE_NAME = "products";
 const CLOUDINARY_CLOUD_NAME = "skydetg1";
 const CLOUDINARY_UPLOAD_PRESET = "compstock_unsigned";
 
+let allProducts = [];
+
 // ------------------- DOM Elements -------------------
 const productGrid = document.getElementById("productGrid");
+const searchInput = document.getElementById("searchInput");
+const productCount = document.getElementById("productCount");
 const loadingState = document.getElementById("loadingState");
 const emptyState = document.getElementById("emptyState");
 const addProductForm = document.getElementById("addProductForm");
@@ -267,7 +283,7 @@ function showToast(message, type = "success") {
 
 // ------------------- Utility: Format Price -------------------
 function formatPrice(price) {
-  return "฿" + Number(price).toLocaleString("th-TH", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  return "₭" + Number(price).toLocaleString("lo-LA", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
 // ------------------- Utility: Format Date -------------------
@@ -347,12 +363,30 @@ async function fetchProducts() {
   }
 
   if (!data || data.length === 0) {
+    allProducts = [];
     emptyState.classList.remove("d-none");
+    productCount.textContent = "0";
     return;
   }
 
-  await renderProducts(data);
+  allProducts = data;
+  applyProductFilter();
 }
+
+function applyProductFilter() {
+  const query = searchInput?.value.trim().toLowerCase() || "";
+  const filtered = query
+    ? allProducts.filter((item) => {
+        const text = `${item.name || ""} ${item.description || ""}`.toLowerCase();
+        return text.includes(query);
+      })
+    : allProducts;
+
+  productCount.textContent = `${filtered.length}`;
+  renderProducts(filtered);
+}
+
+searchInput?.addEventListener("input", applyProductFilter);
 
 // ------------------- Render สินค้าเป็น Card -------------------
 async function renderProducts(products) {
@@ -360,7 +394,7 @@ async function renderProducts(products) {
 
   for (const p of products) {
     const col = document.createElement("div");
-    col.className = "col-12 col-sm-6 col-lg-4 col-xl-3";
+    col.className = "col-6 col-sm-6 col-md-4 col-xl-3";
 
     const imageHtml = p.image_url
       ? `<img src="${p.image_url}" alt="${escapeHtml(p.name)}">`
